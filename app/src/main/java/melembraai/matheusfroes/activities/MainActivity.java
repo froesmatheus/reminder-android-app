@@ -7,6 +7,7 @@ import android.app.PendingIntent;
 import android.app.TimePickerDialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.app.NotificationCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.view.ContextMenu;
@@ -272,9 +273,8 @@ public class MainActivity extends AppCompatActivity {
 
         .setContentTitle(title)
         .setContentText(message)
-        .setSmallIcon(R.mipmap.ic_launcher)
+        .setSmallIcon(R.drawable.ic_reminder)
         .setDefaults(Notification.DEFAULT_ALL);
-
         return builder.build();
 
     }

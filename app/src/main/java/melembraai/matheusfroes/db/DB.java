@@ -5,7 +5,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
 /**
- * Created by Bruno on 06/01/2016.
+ * Created by Matheus on 06/01/2016.
  */
 public class DB extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "MeLembraAi";
@@ -15,11 +15,13 @@ public class DB extends SQLiteOpenHelper {
     public static final String REMINDER_COLUMN_ID = "_id";
     public static final String REMINDER_COLUMN_CONTENT = "content";
     public static final String REMINDER_COLUMN_DATE = "date";
+    public static final String REMINDER_COLUMN_STATUS = "status";
 
     private static final String CREATE_REMINDER_TABLE_DDL = "CREATE TABLE IF NOT EXISTS " + DB.REMINDER_TABLE_NAME + " (" +
             REMINDER_COLUMN_ID +  " INTEGER PRIMARY KEY AUTOINCREMENT, " +
             REMINDER_COLUMN_CONTENT + " TEXT NOT NULL, " +
-            REMINDER_COLUMN_DATE + " INTEGER NOT NULL);";
+            REMINDER_COLUMN_DATE + " INTEGER NOT NULL, " +
+            REMINDER_COLUMN_STATUS + " TEXT NOT NULL);";
 
 
     public DB(Context context) {
