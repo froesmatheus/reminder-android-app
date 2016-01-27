@@ -1,0 +1,12 @@
+<resources>
+    <string name="app_name">Me lembra aí!</string>
+    <string name="new_reminder">NOVO LEMBRETE</string>
+    <string name="remind_me_to">Me lembre de</string>
+    <string name="at_day">no dia</string>
+    <string name="reminder_content_placeholder">Reminder content</string>
+    <string name="reminder_date_placeholder">Reminder date placeholder</string>
+    <string name="cancel_btn">Cancelar</string>
+    <string name="confirm_btn">Confirmar</string>
+    <string name="update_btn">Atualizar</string>
+    <string name="reminderlist_empty_view">Você ainda não adicionou nenhum lembrete\nClique no botão abaixo para adicionar</string>
+</resources>

@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp">
+
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/remind_me_to"
+        android:textSize="19sp" />
+
+    <EditText
+        android:id="@+id/reminder_message"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/textView"
+        android:imeOptions="actionDone"
+        android:inputType="textCapSentences" />
+
+    <TextView
+        android:id="@+id/textView2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/reminder_message"
+        android:layout_marginTop="5dp"
+        android:text="@string/at_day"
+        android:textSize="19sp" />
+
+    <EditText
+        android:id="@+id/date_picker_edt"
+        android:layout_width="180dp"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/textView2"
+        android:editable="false"
+        android:inputType="none" />
+
+    <TextView
+        android:id="@+id/textView3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/date_picker_edt"
+        android:layout_alignLeft="@+id/time_picker_edt"
+        android:layout_alignStart="@+id/time_picker_edt"
+        android:text="às"
+        android:textSize="19sp" />
+
+    <EditText
+        android:id="@+id/time_picker_edt"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:layout_below="@+id/textView3"
+        android:layout_marginLeft="5dp"
+        android:layout_toEndOf="@+id/date_picker_edt"
+        android:layout_toRightOf="@+id/date_picker_edt"
+        android:editable="false"
+        android:inputType="none" />
+
+    <Button
+        android:id="@+id/cancel_btn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/remind_early_txt"
+        android:text="@string/cancel_btn" />
+
+    <Button
+        android:id="@+id/confirm_btn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignEnd="@+id/time_picker_edt"
+        android:layout_alignRight="@+id/time_picker_edt"
+        android:layout_alignTop="@+id/cancel_btn"
+        android:text="@string/update_btn" />
+
+
+    <CheckBox
+        android:id="@+id/remind_me_early_chk"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/date_picker_edt"
+        android:layout_marginBottom="5dp"
+        android:layout_marginTop="5dp"
+        android:text="Me avise com antecedência" />
+
+    <TextView
+        android:id="@+id/remind_early_txt"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/remind_me_early_chk"
+        android:layout_marginBottom="5dp"
+        android:text="Me avise "
+        android:textSize="19sp"
+        android:visibility="gone" />
+
+    <Spinner
+        android:id="@+id/spinner_reminder"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/remind_early_txt"
+        android:layout_below="@+id/remind_me_early_chk"
+        android:layout_toEndOf="@+id/remind_early_txt"
+        android:layout_toRightOf="@+id/remind_early_txt"
+        android:visibility="gone" />
+</RelativeLayout>
