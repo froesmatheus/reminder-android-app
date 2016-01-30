@@ -9,4 +9,5 @@
     <string name="confirm_btn">Confirmar</string>
     <string name="update_btn">Atualizar</string>
     <string name="reminderlist_empty_view">Você ainda não adicionou nenhum lembrete\nClique no botão abaixo para adicionar</string>
+    <string name="snooze_time">Esse é o tempo* de adiamento que o app usa quando você seleciona a opção \"Adiar\" nas notificações</string>
 </resources>

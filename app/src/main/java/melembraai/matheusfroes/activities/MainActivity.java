@@ -2,25 +2,28 @@ package melembraai.matheusfroes.activities;
 
 import android.app.AlarmManager;
 import android.app.DatePickerDialog;
-import android.app.Notification;
-import android.app.PendingIntent;
 import android.app.TimePickerDialog;
-import android.content.Intent;
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.os.Bundle;
-import android.support.v4.app.NotificationCompat;
+import android.support.design.widget.FloatingActionButton;
+import android.support.v4.content.ContextCompat;
+import android.support.v4.view.ViewPager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.view.ContextMenu;
+import android.support.v7.widget.Toolbar;
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.DatePicker;
 import android.widget.EditText;
-import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.SpinnerAdapter;
 import android.widget.TextView;
@@ -32,12 +35,20 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
-import melembraai.matheusfroes.adapters.ReminderAdapter;
+import melembraai.matheusfroes.adapters.TabsAdapter;
 import melembraai.matheusfroes.db.ReminderDAO;
 import melembraai.matheusfroes.domain.Reminder;
-import melembraai.matheusfroes.receivers.NotificationPublisher;
+import melembraai.matheusfroes.extras.NotificationScheduler;
+import melembraai.matheusfroes.extras.SlidingTabLayout;
+import melembraai.matheusfroes.fragments.ActiveRemindersFragment;
 
+/**
+ * Created by mathe on 27/01/2016.
+ */
 public class MainActivity extends AppCompatActivity {
+    private ViewPager viewPager;
+    private SlidingTabLayout slidingTabLayout;
+    private TabsAdapter tabsAdapter;
     private Calendar reminderDate;
     private EditText datePickerEdt, timePickerEdt, reminderContentEdt;
     private Button cancelButton, confirmButton;
@@ -45,32 +56,42 @@ public class MainActivity extends AppCompatActivity {
     private NumberFormat format;
     private Calendar currentDate;
     private ReminderDAO reminderDAO;
-    private ReminderAdapter adapter;
-    private ListView remindersList;
+    private NotificationScheduler notificationScheduler;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_layout);
 
-        Button button = (Button) findViewById(R.id.new_reminder_btn);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        toolbar.setTitle("Lembretes");
+        toolbar.setBackgroundColor(ContextCompat.getColor(this, R.color.colorPrimary));
+        toolbar.setTitleTextColor(Color.WHITE);
+        setSupportActionBar(toolbar);
+
+        notificationScheduler = new NotificationScheduler(this);
         reminderDate = Calendar.getInstance();
-        alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
+        alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
         currentDate = Calendar.getInstance();
         format = NumberFormat.getIntegerInstance();
         format.setMinimumIntegerDigits(2);
-
         reminderDAO = new ReminderDAO(this);
 
-        adapter = new ReminderAdapter(this, reminderDAO.getReminderCursor(), true);
-        remindersList = (ListView) findViewById(R.id.reminders_list);
-        remindersList.setAdapter(adapter);
-        TextView emptyView = (TextView) findViewById(R.id.empty_view);
-        remindersList.setEmptyView(emptyView);
+        viewPager = (ViewPager) findViewById(R.id.view_pager);
+        tabsAdapter = new TabsAdapter(getSupportFragmentManager(), this);
 
-        registerForContextMenu(remindersList);
+        viewPager.setAdapter(tabsAdapter);
+        slidingTabLayout = (SlidingTabLayout) findViewById(R.id.stl_tabs);
+        slidingTabLayout.setDistributeEvenly(true);
+        slidingTabLayout.setBackgroundColor(ContextCompat.getColor(this, R.color.colorPrimary));
+        slidingTabLayout.setSelectedIndicatorColors(Color.WHITE);
 
-        button.setOnClickListener(new View.OnClickListener() {
+        slidingTabLayout.setCustomTabView(R.layout.layout_tab_view, R.id.txt_tab);
+        slidingTabLayout.setViewPager(viewPager);
+
+        FloatingActionButton newReminder = (FloatingActionButton) findViewById(R.id.new_reminder_btn);
+        newReminder.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 showNewReminderDialog();
@@ -79,30 +100,11 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    @Override
-    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
-        super.onCreateContextMenu(menu, v, menuInfo);
-
-        menu.add("Excluir");
-    }
-
-    @Override
-    public boolean onContextItemSelected(MenuItem item) {
-        AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
-
-        if (item.getTitle().equals("Excluir")) {
-            reminderDAO.delete(info.id);
-            adapter.changeCursor(reminderDAO.getReminderCursor());
-            adapter.notifyDataSetChanged();
-        }
-
-        return super.onContextItemSelected(item);
-    }
 
     private void showNewReminderDialog() {
         final AlertDialog.Builder builder = new AlertDialog.Builder(this);
 
-        View view = getLayoutInflater().inflate(R.layout.new_reminder_layout, null);
+        View view = LayoutInflater.from(this).inflate(R.layout.new_reminder_layout, null);
 
         datePickerEdt = (EditText) view.findViewById(R.id.date_picker_edt);
         timePickerEdt = (EditText) view.findViewById(R.id.time_picker_edt);
@@ -133,7 +135,7 @@ public class MainActivity extends AppCompatActivity {
         remindersTime.add("3hs antes");
         remindersTime.add("10hs antes");
         remindersTime.add("1 dia antes");
-        SpinnerAdapter adapter = new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_spinner_dropdown_item, remindersTime );
+        SpinnerAdapter adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, remindersTime);
 
         reminderSpinner.setAdapter(adapter);
 
@@ -197,29 +199,19 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void addNewReminder() {
-        Reminder reminder = new Reminder(reminderContentEdt.getText().toString(), reminderDate);
-
-        reminderDAO.insert(reminder);
-        adapter.changeCursor(reminderDAO.getReminderCursor());
-        adapter.notifyDataSetChanged();
+        Reminder reminder = new Reminder(reminderContentEdt.getText().toString(), reminderDate, Reminder.STATUS_ACTIVE);
+        long reminderId = reminderDAO.insert(reminder);
+        reminder.setId(reminderId);
 
         Toast.makeText(this, "Lembrete adicionado com sucesso.", Toast.LENGTH_SHORT).show();
-        scheduleNewReminder(reminder);
+        notificationScheduler.schedule(reminder);
+        ActiveRemindersFragment activeRemindersFragment = (ActiveRemindersFragment) tabsAdapter.getItem(0);
+        activeRemindersFragment.updateRemindersList();
     }
 
-    private void scheduleNewReminder(Reminder reminder) {
-        Intent notificationIntent = new Intent(this, NotificationPublisher.class);
-
-        notificationIntent.putExtra(NotificationPublisher.NOTIFICATION_ID, 1);
-        notificationIntent.putExtra(NotificationPublisher.NOTIFICATION, getNotification("Novo lembrete!", reminder.getReminderContent()));
-
-
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-        alarmManager.set(AlarmManager.RTC_WAKEUP, reminder.getReminderDate().getTimeInMillis(), pendingIntent);
-    }
 
     private void showTimePicker() {
-        final TimePickerDialog timePickerDialog = new TimePickerDialog(MainActivity.this, new TimePickerDialog.OnTimeSetListener() {
+        final TimePickerDialog timePickerDialog = new TimePickerDialog(this, new TimePickerDialog.OnTimeSetListener() {
             @Override
             public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
                 reminderDate.set(Calendar.HOUR_OF_DAY, hourOfDay);
@@ -234,7 +226,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void showDatePicker() {
-        DatePickerDialog datePickerDialog = new DatePickerDialog(MainActivity.this, new DatePickerDialog.OnDateSetListener() {
+        DatePickerDialog datePickerDialog = new DatePickerDialog(this, new DatePickerDialog.OnDateSetListener() {
             @Override
             public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
                 reminderDate.set(Calendar.DAY_OF_MONTH, dayOfMonth);
@@ -268,14 +260,71 @@ public class MainActivity extends AppCompatActivity {
         return verified;
     }
 
-    public Notification getNotification(String title, String message) {
-        Notification.Builder builder = new Notification.Builder(this)
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.main_activity_menu, menu);
+        return true;
+    }
 
-        .setContentTitle(title)
-        .setContentText(message)
-        .setSmallIcon(R.drawable.ic_reminder)
-        .setDefaults(Notification.DEFAULT_ALL);
-        return builder.build();
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+
+        switch (item.getItemId()) {
+
+            case R.id.change_snooze_time:
+                showChangeSnoozeTimeDialog();
+                return true;
+        }
+
+
+        return super.onOptionsItemSelected(item);
+    }
+
+    private void showChangeSnoozeTimeDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+
+        View view = getLayoutInflater().inflate(R.layout.snooze_time_layout, null);
+
+        final EditText snoozeTimeEdt = (EditText) view.findViewById(R.id.snooze_time_edt);
+        int snoozeTime = getSharedPreferences("USER_PREFERENCES", MODE_PRIVATE).getInt("snoozeTime", 10);
+        snoozeTimeEdt.setText(String.valueOf(snoozeTime));
+        Button saveBtn = (Button) view.findViewById(R.id.save_btn);
+
+        builder.setView(view);
+
+        final AlertDialog dialog = builder.create();
+        dialog.show();
+
+        saveBtn.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                if (checkFields()) {
+                    SharedPreferences.Editor editor = getSharedPreferences("USER_PREFERENCES", MODE_PRIVATE).edit();
+                    editor.putInt("snoozeTime", Integer.valueOf(snoozeTimeEdt.getText().toString()));
+                    editor.apply();
+
+                    dialog.dismiss();
+                }
+            }
+
+            private boolean checkFields() {
+                boolean checked = true;
+
+                if (snoozeTimeEdt.getText().toString().trim().isEmpty()) {
+                    checked = false;
+                    Toast.makeText(MainActivity.this, "O campo não pode estar vazio", Toast.LENGTH_SHORT).show();
+                }
+
+
+                if (Integer.valueOf(snoozeTimeEdt.getText().toString()) <= 0) {
+                    checked = false;
+                    Toast.makeText(MainActivity.this, "O tempo não pode ser menor ou igual a 0", Toast.LENGTH_SHORT).show();
+                }
+
+                return checked;
+            }
+        });
 
     }
 }
